@@ -1,0 +1,20 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use URI;
+
+my @matched = grep { /^origin/ } split "\n", `git remote -v` or die "no origin";
+my $uri = URI->new([split /\s/, $matched[0]]->[1]);
+my $path = $uri->path;
+$path =~ s/\.git$// or die "Can't find path";
+
+sub current_branch {
+    my @branches = split /\n/, `git branch --no-color 2> /dev/null`;
+    my ($branch) = grep { s/^[\*]\s+// } @branches;
+    $branch;
+}
+
+my $branch = current_branch();
+if ($branch =~ /iss([0-9]+)/) {
+    `open https://github.com/$path/issues/$1`;
+}
